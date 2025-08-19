@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "run.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
@@ -15,5 +18,10 @@
   "env": {
     "PYTHONPATH": ".",
     "FLASK_ENV": "production"
+  },
+  "functions": {
+    "run.py": {
+      "maxDuration": 10
+    }
   }
 }
