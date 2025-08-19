@@ -1,0 +1,99 @@
+{% extends 'base.html' %} {% block title %}Início - Sistema de Avarias{%
+endblock %} {% block content %}
+
+<div class="container-fluid py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <!-- Header principal -->
+      <div class="text-center mb-5">
+        <div class="display-1 mb-4">📦</div>
+        <h1 class="display-4 fw-bold text-white mb-3">Sistema de Avarias</h1>
+        <p class="lead text-white-75">
+          Gerencie facilmente os registros de produtos com avaria
+        </p>
+      </div>
+
+      <!-- Cards de opções -->
+      <div class="row g-4 justify-content-center">
+        <!-- Card Hortifrúti -->
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="card h-100 shadow-lg border-0 rounded-4 text-center">
+            <div class="card-body p-4 d-flex flex-column">
+              <div class="display-1 mb-3">🥬</div>
+              <h3 class="card-title fw-bold text-success mb-3">Hortifrúti</h3>
+              <p class="card-text text-muted mb-4 flex-grow-1">
+                Registre rapidamente produtos de hortifrúti com avaria. Simples
+                e direto, apenas nome e peso.
+              </p>
+              <div class="mt-auto">
+                <a
+                  href="{{ url_for('main.registro_hortifruti') }}"
+                  class="btn btn-success btn-lg w-100 py-3 rounded-3"
+                >
+                  <i class="fas fa-plus me-2"></i>
+                  Registrar Hortifrúti
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Uso Interno -->
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="card h-100 shadow-lg border-0 rounded-4 text-center">
+            <div class="card-body p-4 d-flex flex-column">
+              <div class="display-1 mb-3">📱</div>
+              <h3 class="card-title fw-bold text-primary mb-3">Uso Interno</h3>
+              <p class="card-text text-muted mb-4 flex-grow-1">
+                Para produtos com código de barras. Use o scanner automático ou
+                digite manualmente.
+              </p>
+              <div class="mt-auto">
+                <a
+                  href="{{ url_for('main.registro_interno') }}"
+                  class="btn btn-primary btn-lg w-100 py-3 rounded-3"
+                >
+                  <i class="fas fa-barcode me-2"></i>
+                  Registrar com Scanner
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações adicionais -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="card bg-light border-0 rounded-4">
+            <div class="card-body p-4">
+              <div class="row text-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                  <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
+                  <h6 class="fw-bold">Mobile First</h6>
+                  <small class="text-muted"
+                    >Otimizado para smartphones e tablets</small
+                  >
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                  <i class="fas fa-tachometer-alt fa-2x text-success mb-2"></i>
+                  <h6 class="fw-bold">Rápido e Simples</h6>
+                  <small class="text-muted"
+                    >Interface intuitiva para qualquer idade</small
+                  >
+                </div>
+                <div class="col-md-4">
+                  <i class="fas fa-shield-alt fa-2x text-warning mb-2"></i>
+                  <h6 class="fw-bold">Confiável</h6>
+                  <small class="text-muted">Dados salvos automaticamente</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

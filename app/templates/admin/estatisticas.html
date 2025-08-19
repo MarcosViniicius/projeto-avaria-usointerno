@@ -1,0 +1,232 @@
+{% extends 'base.html' %} {% block title %}Admin - Estatísticas{% endblock %} {%
+block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h3 text-primary fw-bold">
+            <i class="fas fa-chart-pie me-2"></i>
+            Estatísticas Detalhadas
+          </h1>
+          <p class="text-muted mb-0">Análise dos dados de avarias</p>
+        </div>
+        <div>
+          <a
+            href="{{ url_for('main.admin_dashboard') }}"
+            class="btn btn-outline-secondary"
+          >
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar
+          </a>
+        </div>
+      </div>
+
+      <!-- Estatísticas por tipo -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-bar me-2"></i>
+                Resumo por Tipo de Produto
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% for stat in stats_tipo %}
+                <div class="col-12 col-md-6">
+                  <div
+                    class="card bg-{{ 'success' if stat.tipo == 'hortifruti' else 'primary' }} text-white h-100"
+                  >
+                    <div class="card-body text-center">
+                      <i
+                        class="fas fa-{{ 'apple-alt' if stat.tipo == 'hortifruti' else 'barcode' }} fa-3x mb-3"
+                      ></i>
+                      <h4 class="card-title">
+                        {{ '🥬 Hortifrúti' if stat.tipo == 'hortifruti' else '📱
+                        Uso Interno' }}
+                      </h4>
+                      <div class="row text-center">
+                        <div class="col-4">
+                          <h5>{{ stat.total_registros }}</h5>
+                          <small>Registros</small>
+                        </div>
+                        <div class="col-4">
+                          <h5>
+                            {% if stat.peso_total %}{{
+                            "%.2f"|format(stat.peso_total) }}{% else %}0{% endif
+                            %}
+                          </h5>
+                          <small>Kg Total</small>
+                        </div>
+                        <div class="col-4">
+                          <h5>
+                            {% if stat.quantidade_total %}{{
+                            stat.quantidade_total }}{% else %}0{% endif %}
+                          </h5>
+                          <small>Quantidade</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico de registros por período -->
+      <div class="row mb-4">
+        <div class="col-12 col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-line me-2"></i>
+                Registros dos Últimos 30 Dias
+              </h5>
+            </div>
+            <div class="card-body">
+              <canvas id="chartPeriodo" width="400" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top produtos -->
+        <div class="col-12 col-lg-4 mt-4 mt-lg-0">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-trophy text-warning me-2"></i>
+                Top 10 Produtos
+              </h5>
+            </div>
+            <div class="card-body">
+              {% for produto in top_produtos %}
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded"
+              >
+                <div class="flex-grow-1">
+                  <div class="fw-bold">
+                    {{ loop.index }}. {{ produto.nome[:15] }}{% if
+                    produto.nome|length > 15 %}...{% endif %}
+                  </div>
+                  <small class="text-muted">
+                    <span
+                      class="badge bg-{{ 'success' if produto.tipo == 'hortifruti' else 'primary' }} me-1"
+                    >
+                      {{ produto.tipo }}
+                    </span>
+                  </small>
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-danger"
+                    >{{ produto.total_avarias }}</span
+                  >
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo geral -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Resumo Geral
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                {% set total_registros =
+                stats_tipo|sum(attribute='total_registros') %} {% set total_peso
+                = stats_tipo|sum(attribute='peso_total') %} {% set
+                total_quantidade = stats_tipo|sum(attribute='quantidade_total')
+                %}
+
+                <div class="col-6 col-md-3">
+                  <h4 class="text-primary">{{ total_registros }}</h4>
+                  <p class="text-muted mb-0">Total de Avarias</p>
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <h4 class="text-success">
+                    {{ "%.2f"|format(total_peso or 0) }} kg
+                  </h4>
+                  <p class="text-muted mb-0">Peso Total Perdido</p>
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <h4 class="text-warning">{{ total_quantidade or 0 }}</h4>
+                  <p class="text-muted mb-0">Unidades Perdidas</p>
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <h4 class="text-info">
+                    {{ ((total_registros / 30) | round(1)) if total_registros
+                    else 0 }}
+                  </h4>
+                  <p class="text-muted mb-0">Média por Dia</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Dados do gráfico
+  const labels = [{% for item in stats_periodo %}'{{ item.data }}'{% if not loop.last %},{% endif %}{% endfor %}];
+  const data = [{% for item in stats_periodo %}{{ item.registros }}{% if not loop.last %},{% endif %}{% endfor %}];
+
+  // Gráfico de registros por período
+  const ctx = document.getElementById('chartPeriodo').getContext('2d');
+  const chartPeriodo = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Registros por dia',
+              data: data,
+              borderColor: 'rgb(13, 110, 253)',
+              backgroundColor: 'rgba(13, 110, 253, 0.1)',
+              tension: 0.1,
+              fill: true
+          }]
+      },
+      options: {
+          responsive: true,
+          plugins: {
+              title: {
+                  display: true,
+                  text: 'Tendência de Registros'
+              }
+          },
+          scales: {
+              y: {
+                  beginAtZero: true,
+                  ticks: {
+                      stepSize: 1
+                  }
+              }
+          }
+      }
+  });
+</script>
+{% endblock %}

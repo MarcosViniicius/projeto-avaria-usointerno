@@ -1,0 +1,185 @@
+{% extends "base.html" %} {% block title %}Editar Produto #{{ produto.id }}{%
+endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-edit"></i> Editar Produto #{{ produto.id }}</h2>
+        <a
+          href="{{ url_for('main.admin_produtos') }}"
+          class="btn btn-secondary"
+        >
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+
+      <!-- Card de Edição -->
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-box"></i> Editar Produto</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="mb-3">
+                  <label for="nome" class="form-label">Nome do Produto</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nome"
+                    name="nome"
+                    value="{{ produto.nome }}"
+                    required
+                  />
+                </div>
+
+                {% if produto.tipo == 'interno' %}
+                <div class="mb-3">
+                  <label for="codigo_barras" class="form-label"
+                    >Código de Barras</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="codigo_barras"
+                    name="codigo_barras"
+                    value="{{ produto.codigo_barras or '' }}"
+                  />
+                  <div class="form-text">Deixe em branco se não aplicável</div>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                  <label class="form-label">Tipo de Produto</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    value="{{ produto.tipo.title() }}"
+                    readonly
+                  />
+                  <div class="form-text">
+                    O tipo do produto não pode ser alterado
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title">
+                      <i class="fas fa-info-circle"></i> Estatísticas
+                    </h6>
+                    <p class="mb-2">
+                      <strong>Registros de avaria:</strong><br />
+                      <span class="badge bg-danger"
+                        >{{ produto.avarias|length }}</span
+                    </p>
+                    <p class="mb-2">
+                      <strong>ID do Produto:</strong><br />
+                      #{{ produto.id }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="d-flex justify-content-between mt-4">
+              <a
+                href="{{ url_for('main.admin_produtos') }}"
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-times"></i> Cancelar
+              </a>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Salvar Alterações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Card de Avarias Relacionadas -->
+      {% if produto.avarias %}
+      <div class="card mt-4">
+        <div class="card-header bg-danger text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-exclamation-triangle"></i>
+            Registros de Avaria ({{ produto.avarias|length }})
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data</th>
+                  {% if produto.tipo == 'hortifruti' %}
+                  <th>Peso (kg)</th>
+                  {% else %}
+                  <th>Quantidade</th>
+                  {% endif %}
+                  <th>Observações</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for avaria in produto.avarias[-10:] %}
+                <tr>
+                  <td>#{{ avaria.id }}</td>
+                  <td>{{ avaria.data_registro.strftime('%d/%m/%Y') }}</td>
+                  <td>
+                    {% if produto.tipo == 'hortifruti' %} {{ avaria.peso }} kg
+                    {% else %} {{ avaria.quantidade }} {% endif %}
+                  </td>
+                  <td>
+                    {{ avaria.observacoes[:50] }}{% if avaria.observacoes|length
+                    > 50 %}...{% endif %}
+                  </td>
+                  <td>
+                    <a
+                      href="{{ url_for('main.admin_editar_avaria', avaria_id=avaria.id) }}"
+                      class="btn btn-sm btn-outline-primary"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if produto.avarias|length > 10 %}
+            <div class="text-center">
+              <small class="text-muted"
+                >Mostrando os 10 registros mais recentes</small
+              >
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-focus no primeiro campo
+  document.getElementById("nome").focus();
+
+  // Validação de formulário
+  document.querySelector("form").addEventListener("submit", function (e) {
+    const nome = document.getElementById("nome").value.trim();
+
+    if (!nome) {
+      e.preventDefault();
+      alert("Nome do produto é obrigatório!");
+      document.getElementById("nome").focus();
+      return;
+    }
+  });
+</script>
+{% endblock %}

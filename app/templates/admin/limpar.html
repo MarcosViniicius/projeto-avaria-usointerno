@@ -1,0 +1,159 @@
+{% extends 'base.html' %} {% block title %}Admin - Limpar Dados{% endblock %} {%
+block content %}
+
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <!-- Header -->
+      <div class="text-center mb-4">
+        <div class="display-1 mb-3">🗑️</div>
+        <h1 class="h3 text-danger fw-bold">Limpar Dados</h1>
+        <p class="text-muted">Remover registros antigos do sistema</p>
+      </div>
+
+      <!-- Aviso de segurança -->
+      <div class="alert alert-warning" role="alert">
+        <h6><i class="fas fa-exclamation-triangle me-2"></i>Atenção!</h6>
+        <p class="mb-0">
+          Esta ação é <strong>irreversível</strong>. Os dados removidos não
+          poderão ser recuperados. Certifique-se de fazer backup se necessário.
+        </p>
+      </div>
+
+      <!-- Opções de limpeza -->
+      <div class="card">
+        <div class="card-body">
+          <!-- Limpar registros antigos (30 dias) -->
+          <div class="mb-4">
+            <h5 class="text-warning">
+              <i class="fas fa-calendar-times me-2"></i>
+              Limpar Registros Antigos
+            </h5>
+            <p class="text-muted">Remove registros anteriores a 30 dias.</p>
+
+            <form
+              method="POST"
+              action="{{ url_for('main.admin_limpar_confirmar') }}"
+              onsubmit="return confirmAction('limpar registros anteriores a 30 dias')"
+            >
+              <input type="hidden" name="acao" value="limpar_30_dias" />
+
+              <div class="mb-3">
+                <label for="senha1" class="form-label"
+                  >Senha de confirmação:</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="senha1"
+                  name="senha_confirmacao"
+                  placeholder="Digite: admin123"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="btn btn-warning">
+                <i class="fas fa-trash-alt me-2"></i>
+                Limpar Registros Antigos
+              </button>
+            </form>
+          </div>
+
+          <hr />
+
+          <!-- Limpar todos os dados -->
+          <div class="mb-4">
+            <h5 class="text-danger">
+              <i class="fas fa-exclamation-circle me-2"></i>
+              Limpar Todos os Dados
+            </h5>
+            <p class="text-muted">
+              <strong>CUIDADO:</strong> Remove TODOS os registros e produtos do
+              sistema.
+            </p>
+
+            <form
+              method="POST"
+              action="{{ url_for('main.admin_limpar_confirmar') }}"
+              onsubmit="return confirmAction('TODOS OS DADOS (esta ação não pode ser desfeita)')"
+            >
+              <input type="hidden" name="acao" value="limpar_tudo" />
+
+              <div class="mb-3">
+                <label for="senha2" class="form-label"
+                  >Senha de confirmação:</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="senha2"
+                  name="senha_confirmacao"
+                  placeholder="Digite: admin123"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="btn btn-danger">
+                <i class="fas fa-bomb me-2"></i>
+                LIMPAR TODOS OS DADOS
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações úteis -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Informações Importantes
+          </h6>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2">
+              <i class="fas fa-shield-alt text-primary me-2"></i>
+              <strong>Backup:</strong> Considere exportar os dados antes de
+              limpar
+            </li>
+            <li class="mb-2">
+              <i class="fas fa-clock text-info me-2"></i>
+              <strong>Performance:</strong> Limpar dados antigos melhora a
+              velocidade
+            </li>
+            <li class="mb-2">
+              <i class="fas fa-database text-success me-2"></i>
+              <strong>Espaço:</strong> Remove dados desnecessários do banco
+            </li>
+            <li>
+              <i class="fas fa-key text-warning me-2"></i>
+              <strong>Senha:</strong> A senha padrão é "admin123"
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Voltar -->
+      <div class="text-center mt-4">
+        <a
+          href="{{ url_for('main.admin_dashboard') }}"
+          class="btn btn-outline-secondary"
+        >
+          <i class="fas fa-arrow-left me-2"></i>
+          Voltar ao Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmAction(action) {
+    return confirm(
+      `Tem certeza que deseja ${action}?\n\nEsta ação não pode ser desfeita!`
+    );
+  }
+</script>
+
+{% endblock %}

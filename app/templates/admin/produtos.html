@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Produtos{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-boxes"></i> Gestão de Produtos</h2>
+                <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Admin
+                </a>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="tipo" class="form-label">Tipo de Produto</label>
+                            <select class="form-select" id="tipo" name="tipo">
+                                <option value="todos" {% if filtros.tipo == 'todos' %}selected{% endif %}>Todos</option>
+                                <option value="interno" {% if filtros.tipo == 'interno' %}selected{% endif %}>Uso Interno</option>
+                                <option value="hortifruti" {% if filtros.tipo == 'hortifruti' %}selected{% endif %}>Hortifruti</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="busca" class="form-label">Buscar</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="busca" 
+                                   name="busca" 
+                                   value="{{ filtros.busca }}" 
+                                   placeholder="Nome do produto ou código de barras...">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                            <a href="{{ url_for('main.admin_produtos') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Limpar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Estatísticas Rápidas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>{{ produtos.total }}</h4>
+                            <small>Total de Produtos</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h4>{{ produtos.items|selectattr('tipo', 'equalto', 'interno')|list|length }}</h4>
+                            <small>Uso Interno</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>{{ produtos.items|selectattr('tipo', 'equalto', 'hortifruti')|list|length }}</h4>
+                            <small>Hortifruti</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h4>{{ produtos.page }}</h4>
+                            <small>Página {{ produtos.page }} de {{ produtos.pages }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Produtos -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Lista de Produtos
+                        {% if filtros.busca or filtros.tipo != 'todos' %}
+                        <span class="badge bg-secondary">Filtrado</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if produtos.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th>Código</th>
+                                    <th>Avarias</th>
+                                    <th>Identificação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for produto in produtos.items %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark">#{{ produto.id }}</span></td>
+                                    <td>
+                                        <strong>{{ produto.nome }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if produto.tipo == 'interno' %}
+                                        <span class="badge bg-info">Uso Interno</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Hortifruti</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if produto.codigo_barras %}
+                                        <code>{{ produto.codigo_barras }}</code>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if produto.avarias|length > 0 %}
+                                        <span class="badge bg-danger">{{ produto.avarias|length }}</span>
+                                        {% else %}
+                                        <span class="text-muted">0</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>ID #{{ produto.id }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('main.admin_editar_produto', produto_id=produto.id) }}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger btn-deletar" 
+                                                    data-produto-id="{{ produto.id }}" 
+                                                    data-produto-nome="{{ produto.nome }}"
+                                                    title="Deletar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação -->
+                    {% if produtos.pages > 1 %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if produtos.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.admin_produtos', page=produtos.prev_num, tipo=filtros.tipo, busca=filtros.busca) }}">
+                                    Anterior
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for page_num in produtos.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != produtos.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('main.admin_produtos', page=page_num, tipo=filtros.tipo, busca=filtros.busca) }}">
+                                            {{ page_num }}
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if produtos.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.admin_produtos', page=produtos.next_num, tipo=filtros.tipo, busca=filtros.busca) }}">
+                                    Próximo
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum produto encontrado</h5>
+                        {% if filtros.busca or filtros.tipo != 'todos' %}
+                        <p class="text-muted">Tente ajustar os filtros de busca</p>
+                        <a href="{{ url_for('main.admin_produtos') }}" class="btn btn-primary">
+                            <i class="fas fa-times"></i> Limpar Filtros
+                        </a>
+                        {% else %}
+                        <p class="text-muted">Não há produtos cadastrados ainda</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Deleção -->
+<div class="modal fade" id="modalDelecao" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmar Deleção
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja deletar o produto <strong id="produtoNome"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Atenção:</strong> Todos os registros de avaria relacionados a este produto também serão deletados. Esta ação não pode ser desfeita.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formDelecao" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Confirmar Deleção
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Event listener para botões de deletar
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-deletar').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const produtoId = this.getAttribute('data-produto-id');
+            const produtoNome = this.getAttribute('data-produto-nome');
+            
+            document.getElementById('produtoNome').textContent = produtoNome;
+            document.getElementById('formDelecao').action = `{{ url_for('main.admin_deletar_produto', produto_id=0) }}`.replace('0', produtoId);
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalDelecao'));
+            modal.show();
+        });
+    });
+});
+
+// Auto-submit do formulário de filtros quando o tipo muda
+document.getElementById('tipo').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+{% endblock %}

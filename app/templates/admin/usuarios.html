@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Usuários{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users"></i> Gestão de Usuários</h2>
+                <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Admin
+                </a>
+            </div>
+
+            <!-- Alerta de Permissão -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Área Restrita:</strong> Apenas administradores podem gerenciar usuários e privilégios.
+            </div>
+
+            <!-- Lista de Usuários -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users"></i> Lista de Usuários ({{ usuarios|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if usuarios %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuário</th>
+                                    <th>E-mail</th>
+                                    <th>Tipo</th>
+                                    <th>Identificação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios %}
+                                <tr {% if usuario.id == current_user.id %}class="table-warning"{% endif %}>
+                                    <td>
+                                        <span class="badge bg-light text-dark">#{{ usuario.id }}</span>
+                                        {% if usuario.id == current_user.id %}
+                                        <span class="badge bg-warning text-dark ms-1">Você</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ usuario.username }}</strong>
+                                        {% if usuario.id == current_user.id %}
+                                        <br><small class="text-muted">(Sua conta)</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if usuario.email %}
+                                        {{ usuario.email }}
+                                        {% else %}
+                                        <span class="text-muted">Não informado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if usuario.is_admin %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-crown"></i> Administrador
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-user"></i> Usuário
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>ID #{{ usuario.id }}</td>
+                                    <td>
+                                        {% if usuario.id != current_user.id %}
+                                        <form method="POST" 
+                                              action="{{ url_for('main.admin_toggle_admin', user_id=usuario.id) }}" 
+                                              style="display: inline;">
+                                            {% if usuario.is_admin %}
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-outline-warning" 
+                                                    onclick="return confirm('Remover privilégios de administrador de {{ usuario.username }}?')"
+                                                    title="Remover Admin">
+                                                <i class="fas fa-user-minus"></i> Remover Admin
+                                            </button>
+                                            {% else %}
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-outline-success" 
+                                                    onclick="return confirm('Promover {{ usuario.username }} a administrador?')"
+                                                    title="Promover a Admin">
+                                                <i class="fas fa-user-plus"></i> Promover Admin
+                                            </button>
+                                            {% endif %}
+                                        </form>
+                                        {% else %}
+                                        <span class="text-muted">
+                                            <i class="fas fa-lock"></i> Sua conta
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Estatísticas dos Usuários -->
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary">{{ usuarios|length }}</h4>
+                                    <small>Total de Usuários</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-danger">{{ usuarios|selectattr('is_admin')|list|length }}</h4>
+                                    <small>Administradores</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-secondary">{{ usuarios|rejectattr('is_admin')|list|length }}</h4>
+                                    <small>Usuários Comuns</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum usuário encontrado</h5>
+                        <p class="text-muted">Isso não deveria acontecer...</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Informações de Segurança -->
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shield-alt"></i> Informações de Segurança
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Privilégios de Administrador:</h6>
+                            <ul class="mb-0">
+                                <li>Acesso total ao painel administrativo</li>
+                                <li>Visualizar e editar todos os registros</li>
+                                <li>Exportar dados do sistema</li>
+                                <li>Gerenciar outros usuários</li>
+                                <li>Limpar dados do sistema</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Notas Importantes:</h6>
+                            <ul class="mb-0">
+                                <li>Você não pode remover seus próprios privilégios</li>
+                                <li>Sempre mantenha pelo menos um administrador</li>
+                                <li>Mudanças de privilégios são registradas</li>
+                                <li>Usuários comuns só podem registrar avarias</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends 'base.html' %} {% block title %}Uso Interno - Sistema de Avarias{%
+endblock %} {% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <!-- Header moderno -->
+      <div class="text-center mb-4">
+        <div class="display-1 mb-3">📱</div>
+        <h1 class="h2 text-primary fw-bold">Registro de Avaria</h1>
+        <p class="text-muted">Uso Interno - com Scanner</p>
+      </div>
+
+      <!-- Card principal -->
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+          <form method="POST" class="needs-validation" novalidate>
+            <!-- Campo Código de Barras -->
+            <div class="mb-4">
+              <label for="codigo_barras" class="form-label fw-semibold h5">
+                <i class="fas fa-barcode text-primary me-2"></i>
+                Código de Barras
+              </label>
+              <div class="input-group input-group-lg">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="codigo_barras"
+                  name="codigo_barras"
+                  placeholder="Digite ou escaneie o código"
+                  required
+                  style="font-size: 1.1rem"
+                />
+                <button type="button" class="btn btn-primary" id="scan-btn">
+                  <i class="fas fa-camera me-1"></i>
+                  Scanner
+                </button>
+              </div>
+              <div class="invalid-feedback">
+                Por favor, digite ou escaneie um código de barras.
+              </div>
+
+              <!-- Container do scanner -->
+              <div id="scanner-container" class="mt-3"></div>
+
+              <!-- Botão de teste (apenas para debug) -->
+              <div class="mt-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-info btn-sm"
+                  onclick="testCameraAccess()"
+                >
+                  <i class="fas fa-tools me-1"></i>
+                  Testar Câmera
+                </button>
+              </div>
+            </div>
+
+            <!-- Campo Nome do Produto -->
+            <div class="mb-4">
+              <label for="nome_produto" class="form-label fw-semibold h5">
+                <i class="fas fa-tag text-success me-2"></i>
+                Nome do Produto
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="nome_produto"
+                name="nome_produto"
+                placeholder="Digite o nome do produto"
+                required
+                style="font-size: 1.1rem; padding: 1rem"
+              />
+              <div class="invalid-feedback">
+                Por favor, digite o nome do produto.
+              </div>
+            </div>
+
+            <!-- Campo Quantidade -->
+            <div class="mb-4">
+              <label for="quantidade" class="form-label fw-semibold h5">
+                <i class="fas fa-sort-numeric-up text-warning me-2"></i>
+                Quantidade
+              </label>
+              <input
+                type="number"
+                min="1"
+                class="form-control form-control-lg"
+                id="quantidade"
+                name="quantidade"
+                value="1"
+                required
+                style="font-size: 1.1rem; padding: 1rem"
+              />
+              <div class="invalid-feedback">
+                Por favor, digite uma quantidade válida.
+              </div>
+            </div>
+
+            <!-- Botão de envio -->
+            <button
+              type="submit"
+              class="btn btn-success btn-lg w-100 py-3 rounded-3"
+            >
+              <i class="fas fa-save me-2"></i>
+              Registrar Avaria
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Dicas de uso -->
+      <div class="mt-4">
+        <div class="card bg-light border-0 rounded-4">
+          <div class="card-body p-3">
+            <h6 class="fw-bold text-primary mb-2">
+              <i class="fas fa-lightbulb me-2"></i>
+              Como usar o scanner:
+            </h6>
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <ul class="list-unstyled small mb-0">
+                  <li>
+                    <i class="fas fa-check text-success me-1"></i> Clique em
+                    "Scanner"
+                  </li>
+                  <li>
+                    <i class="fas fa-check text-success me-1"></i> Permita
+                    acesso à câmera
+                  </li>
+                  <li>
+                    <i class="fas fa-check text-success me-1"></i> Aponte para o
+                    código
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-6">
+                <ul class="list-unstyled small mb-0">
+                  <li>
+                    <i class="fas fa-info text-primary me-1"></i> Funciona em
+                    qualquer dispositivo
+                  </li>
+                  <li>
+                    <i class="fas fa-info text-primary me-1"></i> Entrada manual
+                    sempre disponível
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script para validação de formulário -->
+<script>
+  // Validação do formulário
+  (function () {
+    "use strict";
+    window.addEventListener(
+      "load",
+      function () {
+        var forms = document.getElementsByClassName("needs-validation");
+        var validation = Array.prototype.filter.call(forms, function (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+      },
+      false
+    );
+  })();
+</script>
+
+{% endblock %} {% block scripts %}
+<!-- Múltiplas bibliotecas de scanner com fallbacks progressivos -->
+<script>
+  // Verificar disponibilidade de bibliotecas
+  window.ZXing_LoadAttempts = 0;
+  window.ZXing_MaxAttempts = 3;
+
+  function loadZXingFallback() {
+    window.ZXing_LoadAttempts++;
+
+    if (window.ZXing_LoadAttempts > window.ZXing_MaxAttempts) {
+      console.log(
+        "Todas as tentativas de carregar ZXing falharam, usando modo manual"
+      );
+      return;
+    }
+
+    var script = document.createElement("script");
+    script.onerror = loadZXingFallback;
+
+    // URLs de fallback baseadas na tentativa
+    var urls = [
+      "https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js",
+      "https://cdn.jsdelivr.net/npm/@zxing/library@0.18.6/umd/index.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.6/index.min.js",
+    ];
+
+    script.src = urls[window.ZXing_LoadAttempts - 1];
+    document.head.appendChild(script);
+  }
+</script>
+
+<!-- Primeira tentativa de carregar ZXing -->
+<script
+  src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"
+  onerror="loadZXingFallback()"
+></script>
+
+<!-- Scanner personalizado -->
+<script src="/static/js/scanner.js"></script>
+
+<!-- Verificação final e fallback manual -->
+<script>
+  setTimeout(function () {
+    if (typeof ZXing === "undefined") {
+      console.log("ZXing não carregou, modo manual ativado");
+      // O scanner.js já trata isso automaticamente
+    } else {
+      console.log("ZXing carregado com sucesso!");
+    }
+  }, 2000);
+</script>
+{% endblock %}

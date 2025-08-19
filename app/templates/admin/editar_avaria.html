@@ -1,0 +1,224 @@
+{% extends "base.html" %} {% block title %}Editar Avaria #{{ avaria.id }}{%
+endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-edit"></i> Editar Avaria #{{ avaria.id }}</h2>
+        <a
+          href="{{ url_for('main.admin_registros') }}"
+          class="btn btn-secondary"
+        >
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+
+      <!-- Card de Edição -->
+      <div class="card">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="mb-0">
+            <i class="fas fa-edit"></i> Editar Registro de Avaria
+          </h5>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="row">
+              <!-- Dados do Produto -->
+              <div class="col-md-6">
+                <h6 class="fw-bold text-primary">
+                  <i class="fas fa-box"></i> Dados do Produto
+                </h6>
+
+                <div class="mb-3">
+                  <label for="nome_produto" class="form-label"
+                    >Nome do Produto</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nome_produto"
+                    name="nome_produto"
+                    value="{{ produto.nome }}"
+                    required
+                  />
+                </div>
+
+                {% if produto.tipo == 'interno' %}
+                <div class="mb-3">
+                  <label for="codigo_barras" class="form-label"
+                    >Código de Barras</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="codigo_barras"
+                    name="codigo_barras"
+                    value="{{ produto.codigo_barras or '' }}"
+                  />
+                  <div class="form-text">Deixe em branco se não aplicável</div>
+                </div>
+                {% else %}
+                <div class="mb-3">
+                  <label class="form-label">Tipo de Produto</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    value="{{ produto.tipo.title() }}"
+                    readonly
+                  />
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Dados da Avaria -->
+              <div class="col-md-6">
+                <h6 class="fw-bold text-danger">
+                  <i class="fas fa-exclamation-triangle"></i> Dados da Avaria
+                </h6>
+
+                {% if produto.tipo == 'hortifruti' %}
+                <div class="mb-3">
+                  <label for="peso" class="form-label">Peso (kg)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="peso"
+                    name="peso"
+                    step="0.01"
+                    min="0"
+                    value="{{ avaria.peso or '' }}"
+                    required
+                  />
+                </div>
+                {% else %}
+                <div class="mb-3">
+                  <label for="quantidade" class="form-label">Quantidade</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="quantidade"
+                    name="quantidade"
+                    min="1"
+                    value="{{ avaria.quantidade or '' }}"
+                    required
+                  />
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                  <label for="observacoes" class="form-label"
+                    >Observações</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="observacoes"
+                    name="observacoes"
+                    rows="3"
+                    placeholder="Descreva o tipo de avaria..."
+                  >
+{{ avaria.observacoes or '' }}</textarea
+                  >
+                </div>
+
+                <div class="mb-3">
+                  <label for="data_registro" class="form-label"
+                    >Data de Registro</label
+                  >
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    id="data_registro"
+                    name="data_registro"
+                    value="{{ avaria.data_registro.strftime('%Y-%m-%dT%H:%M') }}"
+                  />
+                  <div class="form-text">
+                    Deixe em branco para manter a data atual
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="row mt-3">
+              <div class="col-12">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title">
+                      <i class="fas fa-info-circle"></i> Informações do Registro
+                    </h6>
+                    <div class="row">
+                      <div class="col-md-4">
+                        <small class="text-muted">Registro #:</small><br />
+                        <strong>{{ avaria.id }}</strong>
+                      </div>
+                      <div class="col-md-4">
+                        <small class="text-muted">ID do Produto:</small><br />
+                        <strong>#{{ produto.id }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="d-flex justify-content-between mt-4">
+              <a
+                href="{{ url_for('main.admin_registros') }}"
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-times"></i> Cancelar
+              </a>
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Salvar Alterações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-focus no primeiro campo
+  document.getElementById("nome_produto").focus();
+
+  // Validação de formulário
+  document.querySelector("form").addEventListener("submit", function (e) {
+    const nomeProduto = document.getElementById("nome_produto").value.trim();
+
+    if (!nomeProduto) {
+      e.preventDefault();
+      alert("Nome do produto é obrigatório!");
+      document.getElementById("nome_produto").focus();
+      return;
+    }
+
+    // Verificar se é hortifruti (tem campo peso) ou uso interno (tem campo quantidade)
+    const campoPeso = document.getElementById("peso");
+    const campoQuantidade = document.getElementById("quantidade");
+
+    if (campoPeso) {
+      // É hortifruti
+      const peso = campoPeso.value;
+      if (!peso || peso <= 0) {
+        e.preventDefault();
+        alert("Peso deve ser maior que zero!");
+        campoPeso.focus();
+        return;
+      }
+    } else if (campoQuantidade) {
+      // É uso interno
+      const quantidade = campoQuantidade.value;
+      if (!quantidade || quantidade <= 0) {
+        e.preventDefault();
+        alert("Quantidade deve ser maior que zero!");
+        campoQuantidade.focus();
+        return;
+      }
+    }
+  });
+</script>
+{% endblock %}
